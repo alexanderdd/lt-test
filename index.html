@@ -1,1 +1,120 @@
-hello worldddd
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fullscreen Animated Circles</title>
+    <style>
+        /* Basic styles to remove default margin and set body to full height */
+        body {
+            margin: 0; /* Remove default margin */
+            overflow: hidden; /* Hide scrollbars */
+            background-color: #000000; /* Light background color */
+        }
+        canvas {
+            position: absolute; /* Position the canvas absolutely */
+            top: 0; /* Align to top */
+            left: 0; /* Align to left */
+        }
+    </style>
+</head>
+<body>
+    <canvas id="myCanvas"></canvas> <!-- Canvas element -->
+    
+    <script>
+        const canvas = document.getElementById('myCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Function to resize the canvas
+        function resizeCanvas() {
+            canvas.width = window.innerWidth; // Set canvas width to window width
+            canvas.height = window.innerHeight; // Set canvas height to window height
+        }
+
+        // Circle object
+        class Circle {
+            constructor(x, y, radius, color) {
+                this.x = x;
+                this.y = y;
+                this.radius = radius;
+                this.color = color;
+                this.growing = true; // Flag to determine if the circle is growing
+                this.growthRate = 0.5; // Rate of growth/shrinkage
+                this.maxRadius = 30; // Maximum radius
+                this.minRadius = 10; // Minimum radius
+                this.dx = Math.random() * 2 - 1; // Change in x (random speed)
+                this.dy = Math.random() * 2 - 1; // Change in y (random speed)
+            }
+
+            update() {
+                // Update radius
+                if (this.growing) {
+                    this.radius += this.growthRate; // Increase the radius
+                    if (this.radius >= this.maxRadius) {
+                        this.growing = false; // Start shrinking
+                    }
+                } else {
+                    this.radius -= this.growthRate; // Decrease the radius
+                    if (this.radius <= this.minRadius) {
+                        this.growing = true; // Start growing
+                    }
+                }
+
+                // Update position
+                this.x += this.dx;
+                this.y += this.dy;
+
+                // Bounce off walls
+                if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
+                    this.dx = -this.dx; // Reverse direction on x-axis
+                }
+                if (this.y + this.radius > canvas.height || this.y - this.radius < 0) {
+                    this.dy = -this.dy; // Reverse direction on y-axis
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+                ctx.fill();
+                ctx.closePath();
+            }
+        }
+
+        // Array to hold circles
+        const circles = [];
+        const colors = ['#0B5D8B', '#0E99A6', '#99CE07']; // Colors array
+
+        // Create multiple circles
+        for (let i = 0; i < 20; i++) { // Increased number of circles
+            const x = Math.random() * canvas.width; // Random x position
+            const y = Math.random() * canvas.height; // Random y position
+            const radius = Math.random() * 20 + 10; // Random initial radius between 10 and 30
+            const color = colors[Math.floor(Math.random() * colors.length)]; // Random color
+            circles.push(new Circle(x, y, radius, color)); // Push Circle object to array
+        }
+
+        // Main animation loop
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+            circles.forEach(circle => {
+                circle.update(); // Update each circle's size and position
+                circle.draw(); // Draw each circle
+            });
+            requestAnimationFrame(animate); // Request the next frame
+        }
+
+        // Start the animation when the window loads
+        window.onload = () => {
+            resizeCanvas(); // Resize canvas to full screen
+            animate(); // Start the animation
+        };
+
+        // Add event listener to resize canvas on window resize
+        window.addEventListener('resize', () => {
+            resizeCanvas(); // Resize canvas when window is resized
+        });
+    </script>
+</body>
+</html>
